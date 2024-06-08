@@ -19,7 +19,6 @@ from .serializers import *
 from .models import *
 from datetime import datetime
 import os
-import pwd
 import hashlib
 
 from django.http import JsonResponse
@@ -46,3 +45,4 @@ class ActivitesMissionViewset(ModelViewSet):
     serializer_class = ActivitesMissionSerializer
     queryset = ActivitesMission.objects.all()
 """
+

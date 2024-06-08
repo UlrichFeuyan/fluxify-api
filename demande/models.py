@@ -1,6 +1,6 @@
 from django.db import models
 
-from account.models import User
+from users.models import User
 
 class TypeDemande(models.Model):
     nom = models.CharField(max_length=254)
