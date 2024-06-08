@@ -1,20 +1,26 @@
-# Introduction 
-TODO: Give a short introduction of your project. Let this section explain the objectives or the motivation behind this project. 
+# read this to deploy on WINDOWS
+# Make sure that you have python installed
 
-# Getting Started
-TODO: Guide users through getting your code up and running on their own system. In this section you can talk about:
-1.	Installation process
-2.	Software dependencies
-3.	Latest releases
-4.	API references
+# After cloned the project
 
-# Build and Test
-TODO: Describe and show how to build your code and run the tests. 
 
-# Contribute
-TODO: Explain how other users and developers can contribute to make your code better. 
 
-If you want to learn more about creating good readme files then refer the following [guidelines](https://docs.microsoft.com/en-us/azure/devops/repos/git/create-a-readme?view=azure-devops). You can also seek inspiration from the below readme files:
-- [ASP.NET Core](https://github.com/aspnet/Home)
-- [Visual Studio Code](https://github.com/Microsoft/vscode)
-- [Chakra Core](https://github.com/Microsoft/ChakraCore)
+👇🏽Install modules via `VENV` (windows) 👇🏽
+
+$ virtualenv env ✔️ (if don't work use: "python -m venv env")
+$ .\env\Scripts\activate ✔️
+$ pip3 install -r requirements.txt ✔️
+
+
+
+👇🏽Set Up Database👇🏽
+## You need to import first your databases on mysql.
+$ python manage.py makemigrations ✔️
+$ python manage.py migrate ✔️
+
+
+
+👇🏽Start the APP👇🏽
+$ python manage.py createsuperuser # create the admin ✔️
+$ python manage.py runserver       # start the project✔️
+
