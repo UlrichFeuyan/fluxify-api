@@ -54,6 +54,7 @@ INSTALLED_APPS = [
 
     'account.apps.AccountConfig',
     'demande.apps.DemandeConfig',
+    'taches.apps.TachesConfig',
 ]
 
 MIDDLEWARE = [
