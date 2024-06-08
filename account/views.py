@@ -45,3 +45,4 @@ class ActivitesMissionViewset(ModelViewSet):
     serializer_class = ActivitesMissionSerializer
     queryset = ActivitesMission.objects.all()
 """
+
