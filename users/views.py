@@ -1,7 +1,9 @@
 from django.shortcuts import render
 from rest_framework.views import APIView
+from rest_framework.viewsets import ReadOnlyModelViewSet
 from rest_framework.response import Response
-from rest_framework.exceptions import AuthenticationFailed
+from rest_framework.exceptions import AuthenticationFailed, NotFound
+from rest_framework.generics import ListAPIView
 from .serializers import UserSerializer
 from .models import User
 import jwt, datetime
@@ -31,16 +33,22 @@ class LoginView(APIView):
         ),
         responses={
             200: openapi.Response(
-                description="JWT Token",
+                description="JWT Token and user data",
                 examples={
                     "application/json": {
-                        "jwt": "your_jwt_token"
+                        "jwt": "your_jwt_token",
+                        "user": {
+                            "id": 1,
+                            "codeuser": "USXXX",
+                            "name": "User Name",
+                            "email": "user@example.com"
+                        }
                     }
                 }
             ),
             401: "Unauthorized"
         },
-        operation_description="Authentifier un utilisateur, et retourner le Token"
+        operation_description="Authentifier un utilisateur, et retourner le Token avec les données de l'utilisateur"
     )
     def post(self, request):
         codeuser = request.data['codeuser']
@@ -62,11 +70,14 @@ class LoginView(APIView):
 
         token = jwt.encode(payload, 'secret', algorithm='HS256')
 
+        user_data = UserSerializer(user).data  # Sérialiser les données de l'utilisateur
+
         response = Response()
 
         response.set_cookie(key='jwt', value=token, httponly=True)
         response.data = {
-            'jwt': token
+            'jwt': token,
+            'user': user_data  # Inclure les données de l'utilisateur dans la réponse
         }
 
         return response
@@ -109,3 +120,37 @@ class LogoutView(APIView):
             'message': 'Logout successfully'
         }
         return response
+
+class UserViewSet(ReadOnlyModelViewSet):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+
+    @swagger_auto_schema(
+        operation_description="Lister les utilisateurs",
+        responses={200: UserSerializer(many=True)}
+    )
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
+
+    @swagger_auto_schema(
+        operation_description="Récupérer un utilisateur par son codeuser",
+        responses={200: UserSerializer, 404: "User not found"},
+        manual_parameters=[
+            openapi.Parameter(
+                'codeuser',
+                openapi.IN_PATH,
+                description="Code utilisateur",
+                type=openapi.TYPE_STRING
+            )
+        ]
+    )
+    def retrieve(self, request, *args, **kwargs):
+        return super().retrieve(request, *args, **kwargs)
+
+    def get_object(self):
+        queryset = self.get_queryset()
+        codeuser = self.kwargs.get('pk')
+        user = queryset.filter(codeuser=codeuser).first()
+        if user is None:
+            raise NotFound("User not found")
+        return user
