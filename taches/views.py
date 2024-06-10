@@ -1,4 +1,5 @@
 import subprocess
+from typing import Generic
 from django.http import JsonResponse, HttpResponse
 from django.shortcuts import get_object_or_404
 from django.contrib.auth import authenticate, login
@@ -12,6 +13,7 @@ from rest_framework.response import Response
 from django.contrib.auth.hashers import check_password, make_password
 from rest_framework import status
 from rest_framework.generics import RetrieveAPIView
+from rest_framework import generics
 from drf_yasg.utils import swagger_auto_schema
 from django.contrib.auth import get_user_model, logout
 from drf_yasg import openapi
@@ -44,13 +46,33 @@ def get_document_for_mission(request, mission_id):
 
 """
 
-# Create your views here.
+# VUE POUR STATUT.
 
 class StatutViewset(ModelViewSet):
     serializer_class = StatutSerializer
     queryset = Statut.objects.all()
-    
+
+class StatutListCreate(generics.ListCreateAPIView):
+    queryset = Statut.objects.all()
+    serializer_class = StatutSerializer
+
+class StatutRetrieveUpdateDestroy(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Statut.objects.all()
+    serializer_class = StatutSerializer
+
+
+
+#VUE POUR TACHE
+
 
 class TacheViewset(ModelViewSet):
     serializer_class = TacheSerializer
     queryset = Tache.objects.all()
+
+class TacheListCreate(generics.ListCreateAPIView):
+    queryset = Tache.objects.all()
+    serializer_class = TacheSerializer
+
+class TacheRetrieveUpdateDestroy(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Tache.objects.all()
+    serializer_class = TacheSerializer
