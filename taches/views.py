@@ -21,8 +21,6 @@ from .serializers import *
 from .models import *
 from datetime import datetime
 import os
-import pwd
-import hashlib
 
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST
@@ -32,19 +30,6 @@ from django.db.models import Q
 
 User = get_user_model()
 
-
-"""
-@permission_classes([IsAuthenticated])  # Exemple de permission, ajustez selon votre authentification
-@api_view(['GET'])
-def get_document_for_mission(request, mission_id):
-    queryset = MissionDocument.objects.filter(idmission=mission_id).select_related('iddocument')
-    documents = []
-    if queryset:
-        documents = [md.iddocument for md in queryset]
-        serializer = DocumentSerializer(documents, many=True)
-    return Response(serializer.data)
-
-"""
 
 # VUE POUR STATUT.
 
