@@ -1,3 +1,9 @@
 from django.contrib import admin
 
-# Register your models here.
+from users.models import *
+from .models import *
+
+admin.site.register(User)
+admin.site.register(Demande)
+admin.site.register(TypeDemande)
+admin.site.register(DemandeValidation)

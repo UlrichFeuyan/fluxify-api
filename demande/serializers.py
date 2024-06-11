@@ -15,3 +15,9 @@ class DemandeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Demande
         fields = '__all__'
+
+
+class TypeDemandeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = TypeDemande
+        fields = '__all__'

@@ -19,8 +19,6 @@ from .serializers import *
 from .models import *
 from datetime import datetime
 import os
-import pwd
-import hashlib
 
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST
@@ -47,3 +45,8 @@ def get_document_for_mission(request, mission_id):
 class DemandeViewset(ModelViewSet):
     serializer_class = DemandeSerializer
     queryset = Demande.objects.all()
+
+
+class TypeDemandeViewset(ModelViewSet):
+    serializer_class = TypeDemandeSerializer
+    queryset = TypeDemande.objects.all()
