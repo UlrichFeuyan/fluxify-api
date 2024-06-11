@@ -8,7 +8,7 @@ router.register('tache', TacheViewset, basename='tache')
 router.register('statut', StatutViewset, basename='statut')
 
 
-app_name = 'demande'
+app_name = 'taches'
 urlpatterns = [
     path('', include(router.urls)),
     # Routes pour Statut
