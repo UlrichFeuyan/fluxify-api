@@ -21,3 +21,9 @@ class TypeDemandeSerializer(serializers.ModelSerializer):
     class Meta:
         model = TypeDemande
         fields = '__all__'
+
+
+class CommentaireSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Commentaire
+        fields = '__all__'

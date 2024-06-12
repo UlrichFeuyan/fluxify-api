@@ -50,3 +50,8 @@ class DemandeViewset(ModelViewSet):
 class TypeDemandeViewset(ModelViewSet):
     serializer_class = TypeDemandeSerializer
     queryset = TypeDemande.objects.all()
+
+
+class CommentaireViewset(ModelViewSet):
+    serializer_class = CommentaireSerializer
+    queryset = Commentaire.objects.all()

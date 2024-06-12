@@ -6,6 +6,7 @@ router = routers.SimpleRouter()
 # router.register('activitesmission', ActivitesMissionViewset, basename='activitesmission')
 router.register('demande', DemandeViewset, basename='demande')
 router.register('typedemande', TypeDemandeViewset, basename='typedemande')
+router.register('commentaire', CommentaireViewset, basename='commentaires')
 
 
 app_name = 'demande'
