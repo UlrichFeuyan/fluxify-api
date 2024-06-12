@@ -46,6 +46,41 @@ class DemandeViewset(ModelViewSet):
     serializer_class = DemandeSerializer
     queryset = Demande.objects.all()
 
+    @swagger_auto_schema(
+        operation_description="Désactiver une demande",
+        manual_parameters=[
+            openapi.Parameter('id', openapi.IN_PATH, description="ID de la demande à désactiver", type=openapi.TYPE_INTEGER)
+        ],
+        responses={
+            200: openapi.Response(
+                description="Demande désactivée avec succès",
+                examples={
+                    "application/json": {
+                        "status": "demande désactivée"
+                    }
+                }
+            ),
+            404: openapi.Response(
+                description="Demande non trouvée",
+                examples={
+                    "application/json": {
+                        "error": "Demande non trouvée"
+                    }
+                }
+            )
+        },
+        request_body=None  # Indique qu'il n'y a pas de corps de requête
+    )
+    @action(detail=True, methods=['post'], url_path='desactiver', url_name='desactiver')
+    def desactiver(self, request, pk=None):
+        try:
+            demande = self.get_object()
+            demande.active = False
+            demande.save()
+            return Response({'status': 'demande désactivée'}, status=status.HTTP_200_OK)
+        except Demande.DoesNotExist:
+            return Response({'error': 'Demande non trouvée'}, status=status.HTTP_404_NOT_FOUND)
+
 
 class TypeDemandeViewset(ModelViewSet):
     serializer_class = TypeDemandeSerializer

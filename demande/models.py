@@ -16,6 +16,8 @@ class Demande(models.Model):
     validated_at = models.DateField(null=True)
     initiateur = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='initiated_demandes')
     validateur = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='validated_demandes')
+    active = models.BooleanField(default=True)
+
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
