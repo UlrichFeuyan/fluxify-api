@@ -31,3 +31,13 @@ class DemandeValidation(models.Model):
 
     def __str__(self):
         return f"Validation for Demande {self.demande.id} by {self.user}"
+
+
+class Commentaire(models.Model):
+    demande = models.ForeignKey(Demande, on_delete=models.CASCADE, related_name='commentaires')
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    texte = models.TextField()
+    date_creation = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Commentaire par {self.user} pour la demande {self.demande}"
