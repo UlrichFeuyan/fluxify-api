@@ -81,7 +81,41 @@ class DemandeViewset(ModelViewSet):
         except Demande.DoesNotExist:
             return Response({'error': 'Demande non trouvée'}, status=status.HTTP_404_NOT_FOUND)
 
-
+    @swagger_auto_schema(
+        operation_description="Activer une demande",
+        manual_parameters=[
+            openapi.Parameter('id', openapi.IN_PATH, description="ID de la demande à activer", type=openapi.TYPE_INTEGER)
+        ],
+        responses={
+            200: openapi.Response(
+                description="Demande activée avec succès",
+                examples={
+                    "application/json": {
+                        "status": "demande activée"
+                    }
+                }
+            ),
+            404: openapi.Response(
+                description="Demande non trouvée",
+                examples={
+                    "application/json": {
+                        "error": "Demande non trouvée"
+                    }
+                }
+            )
+        },
+        request_body=None  # Indique qu'il n'y a pas de corps de requête
+    )
+    @action(detail=True, methods=['post'], url_path='activer', url_name='activer')
+    def activer(self, request, pk=None):
+        try:
+            demande = self.get_object()
+            demande.active = True
+            demande.save()
+            return Response({'status': 'demande activée'}, status=status.HTTP_200_OK)
+        except Demande.DoesNotExist:
+            return Response({'error': 'Demande non trouvée'}, status=status.HTTP_404_NOT_FOUND)
+        
 class TypeDemandeViewset(ModelViewSet):
     serializer_class = TypeDemandeSerializer
     queryset = TypeDemande.objects.all()
