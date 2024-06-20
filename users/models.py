@@ -24,12 +24,20 @@ class CustomUserManager(BaseUserManager):
         return self.create_user(codeuser, password, **extra_fields)
 
 
+class Profil(models.Model):
+    nom = models.CharField(max_length=255)
+
+    def __str__(self):
+        return self.nom
+
+
 class User(AbstractUser):
     codeuser = models.CharField(max_length=255, unique=True)
-    name = models.CharField(max_length=255)
-    email = models.CharField(max_length=255)
+    name = models.CharField(max_length=255, blank=True, null=True)
+    email = models.CharField(max_length=255, blank=True, null=True)
     password = models.CharField(max_length=255)
-    phone = models.CharField(max_length=255)
+    phone = models.CharField(max_length=255, blank=True, null=True)
+    profil = models.ForeignKey('Profil', on_delete=models.SET_NULL, null=True, related_name='users')
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

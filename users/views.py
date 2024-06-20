@@ -1,14 +1,19 @@
 from django.shortcuts import render
 from rest_framework.views import APIView
-from rest_framework.viewsets import ReadOnlyModelViewSet
+from rest_framework.viewsets import ReadOnlyModelViewSet, ModelViewSet
 from rest_framework.response import Response
 from rest_framework.exceptions import AuthenticationFailed, NotFound
 from rest_framework.generics import ListAPIView
-from .serializers import UserSerializer
-from .models import User
+from .serializers import UserSerializer, ProfilSerializer
+from .models import User, Profil
 import jwt, datetime
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
+
+
+class ProfilViewSet(ModelViewSet):
+    queryset = Profil.objects.all()
+    serializer_class = ProfilSerializer
 
 class RegisterView(APIView):
     @swagger_auto_schema(
@@ -121,7 +126,7 @@ class LogoutView(APIView):
         }
         return response
 
-class UserViewSet(ReadOnlyModelViewSet):
+class UserViewSet(ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
 
@@ -149,8 +154,30 @@ class UserViewSet(ReadOnlyModelViewSet):
 
     def get_object(self):
         queryset = self.get_queryset()
-        codeuser = self.kwargs.get('pk')
+        codeuser = self.kwargs.get('codeuser')
         user = queryset.filter(codeuser=codeuser).first()
         if user is None:
             raise NotFound("User not found")
         return user
+
+    @swagger_auto_schema(
+        operation_description="Mettre à jour un utilisateur",
+        request_body=UserSerializer,
+        responses={200: UserSerializer, 404: "User not found"}
+    )
+    def update(self, request, *args, **kwargs):
+        partial = kwargs.pop('partial', False)
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=request.data, partial=partial)
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
+        return Response(serializer.data)
+
+    @swagger_auto_schema(
+        operation_description="Mettre à jour partiellement un utilisateur",
+        request_body=UserSerializer,
+        responses={200: UserSerializer, 404: "User not found"}
+    )
+    def partial_update(self, request, *args, **kwargs):
+        kwargs['partial'] = True
+        return self.update(request, *args, **kwargs)

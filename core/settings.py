@@ -139,6 +139,12 @@ USE_THOUSAND_SEPARATOR = True
 
 X_FRAME_OPTIONS = "SAMEORIGIN"
 
+SILENCED_SYSTEM_CHECKS = ["security.W019"]
+
+INTERNAL_IPS = [
+    "127.0.0.1",
+]
+
 ####################################
 ##  CKEDITOR CONFIGURATION        ##
 ####################################
