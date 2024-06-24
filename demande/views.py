@@ -38,7 +38,7 @@ class DemandeViewSet(ModelViewSet):
     )
     @action(detail=False, methods=['get'], url_path='a-valider-par/(?P<codeuser>[^/.]+)', url_name='a-valider-par')
     def a_valider_par(self, request, codeuser=None):
-        demandes = Demande.objects.filter(validateurs__codeuser=codeuser, active=True, status='en attente')
+        demandes = Demande.objects.filter(validateurs__codeuser=codeuser, active=True, status=0)
         page = self.paginate_queryset(demandes)
         if page is not None:
             serializer = self.get_serializer(page, many=True)

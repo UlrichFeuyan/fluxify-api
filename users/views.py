@@ -4,6 +4,7 @@ from rest_framework.viewsets import ReadOnlyModelViewSet, ModelViewSet
 from rest_framework.response import Response
 from rest_framework.exceptions import AuthenticationFailed, NotFound
 from rest_framework.generics import ListAPIView
+from rest_framework.decorators import action
 from .serializers import UserSerializer, ProfilSerializer
 from .models import User, Profil
 import jwt, datetime
@@ -138,29 +139,6 @@ class UserViewSet(ModelViewSet):
         return super().list(request, *args, **kwargs)
 
     @swagger_auto_schema(
-        operation_description="Récupérer un utilisateur par son codeuser",
-        responses={200: UserSerializer, 404: "User not found"},
-        manual_parameters=[
-            openapi.Parameter(
-                'codeuser',
-                openapi.IN_PATH,
-                description="Code utilisateur",
-                type=openapi.TYPE_STRING
-            )
-        ]
-    )
-    def retrieve(self, request, *args, **kwargs):
-        return super().retrieve(request, *args, **kwargs)
-
-    def get_object(self):
-        queryset = self.get_queryset()
-        codeuser = self.kwargs.get('codeuser')
-        user = queryset.filter(codeuser=codeuser).first()
-        if user is None:
-            raise NotFound("User not found")
-        return user
-
-    @swagger_auto_schema(
         operation_description="Mettre à jour un utilisateur",
         request_body=UserSerializer,
         responses={200: UserSerializer, 404: "User not found"}
@@ -181,3 +159,23 @@ class UserViewSet(ModelViewSet):
     def partial_update(self, request, *args, **kwargs):
         kwargs['partial'] = True
         return self.update(request, *args, **kwargs)
+
+    @swagger_auto_schema(
+        operation_description="Récupérer un utilisateur par son codeuser",
+        responses={200: UserSerializer, 404: "User not found"},
+        manual_parameters=[
+            openapi.Parameter(
+                'codeuser',
+                openapi.IN_PATH,
+                description="Code utilisateur",
+                type=openapi.TYPE_STRING
+            )
+        ]
+    )
+    @action(detail=False, methods=['get'], url_path='by-codeuser/(?P<codeuser>[^/.]+)')
+    def by_codeuser(self, request, codeuser=None):
+        user = self.get_queryset().filter(codeuser=codeuser).first()
+        if user is None:
+            raise NotFound("User not found")
+        serializer = self.get_serializer(user)
+        return Response(serializer.data)

@@ -13,5 +13,4 @@ urlpatterns = [
     path('login', LoginView.as_view()),
     path('user', UserView.as_view()),
     path('logout', LogoutView.as_view()),
-    path('<str:codeuser>/', UserViewSet.as_view({'get': 'retrieve'}), name='user-detail'),
 ]

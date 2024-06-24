@@ -1,5 +1,4 @@
 from django.db import models
-
 from users.models import User
 
 class TypeDemande(models.Model):
@@ -35,12 +34,26 @@ class Demande(models.Model):
         validations_requises = [v for v in validations if v.user.profil in self.type_demande.profils_requis.all()]
         validations_optionnelles = [v for v in validations if v.user.profil in self.type_demande.profils_optionnels.all()]
 
-        if all(v.status for v in validations_requises) and len(validations_requises) >= self.type_demande.nombre_validations_min_requis:
-            self.status = 'validé'
-        elif any(v.status is False for v in validations_requises):
-            self.status = 'rejeté'
+        nombre_validations_requises = self.type_demande.nombre_validations_min_requis
+
+        if nombre_validations_requises is None:
+            # Si le nombre de validations minimales requises n'est pas défini,
+            # tous les statuts de validation doivent être à 1 pour que la demande soit validée
+            if all(v.status == 1 for v in validations):
+                self.status = 1  # validé
+            elif any(v.status == 2 for v in validations):
+                self.status = 2  # rejeté
+            else:
+                self.status = 0  # en attente
         else:
-            self.status = 'en attente'
+            # Si le nombre de validations minimales requises est défini,
+            # vérifier les validations requises et optionnelles
+            if all(v.status == 1 for v in validations_requises) and len(validations_requises) >= nombre_validations_requises:
+                self.status = 1  # validé
+            elif any(v.status == 2 for v in validations_requises):
+                self.status = 2  # rejeté
+            else:
+                self.status = 0  # en attente
 
         self.save()
 
