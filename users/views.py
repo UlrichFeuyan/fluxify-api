@@ -7,6 +7,8 @@ from rest_framework.generics import ListAPIView
 from rest_framework.decorators import action
 from .serializers import UserSerializer, ProfilSerializer
 from .models import User, Profil
+from django.views.decorators.csrf import csrf_exempt
+from django.utils.decorators import method_decorator
 import jwt, datetime
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
@@ -22,6 +24,7 @@ class RegisterView(APIView):
         responses={201: UserSerializer},
         operation_description="Créer un utilisateur"
     )
+    @method_decorator(csrf_exempt)
     def post(self, request):
         serializer = UserSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -56,6 +59,7 @@ class LoginView(APIView):
         },
         operation_description="Authentifier un utilisateur, et retourner le Token avec les données de l'utilisateur"
     )
+    @method_decorator(csrf_exempt)
     def post(self, request):
         codeuser = request.data['codeuser']
         password = request.data['password']
@@ -119,6 +123,7 @@ class LogoutView(APIView):
         },
         operation_description="Logout user by deleting JWT cookie"
     )
+    @method_decorator(csrf_exempt)
     def post(self, request):
         response = Response()
         response.delete_cookie('jwt')
@@ -143,6 +148,7 @@ class UserViewSet(ModelViewSet):
         request_body=UserSerializer,
         responses={200: UserSerializer, 404: "User not found"}
     )
+    @method_decorator(csrf_exempt)
     def update(self, request, *args, **kwargs):
         partial = kwargs.pop('partial', False)
         instance = self.get_object()
@@ -156,6 +162,7 @@ class UserViewSet(ModelViewSet):
         request_body=UserSerializer,
         responses={200: UserSerializer, 404: "User not found"}
     )
+    @method_decorator(csrf_exempt)
     def partial_update(self, request, *args, **kwargs):
         kwargs['partial'] = True
         return self.update(request, *args, **kwargs)
