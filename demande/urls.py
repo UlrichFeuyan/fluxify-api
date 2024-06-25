@@ -5,6 +5,7 @@ from .views import *
 router = routers.SimpleRouter()
 # router.register('activitesmission', ActivitesMissionViewset, basename='activitesmission')
 router.register('demande', DemandeViewset, basename='demande')
+router.register('typedemande', TypeDemandeViewset, basename='typedemande')
 
 
 app_name = 'demande'

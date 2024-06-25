@@ -33,10 +33,11 @@ schema_view = get_schema_view(
     ),
     public=True,
     permission_classes=[permissions.AllowAny],
+    authentication_classes=[],
 )
 
 urlpatterns = [
-    path('account/', include('account.urls')),
+    path('users/', include('users.urls')),
     path('demande/', include('demande.urls')),
     path('admin/', admin.site.urls),
     path('tache/', include('taches.urls')),
@@ -45,8 +46,6 @@ urlpatterns = [
     re_path(r'^$', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
     re_path(r'^redoc/$', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
 ]
-urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
-urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 admin.site.site_header = "Administration API FLUXIFY"
 admin.site.index_title = "Administration"
