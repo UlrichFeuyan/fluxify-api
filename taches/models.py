@@ -31,6 +31,7 @@ class Tache(models.Model):
     statut = models.ForeignKey(Statut, on_delete=models.CASCADE, related_name='statut')
     date_debut_tache = models.DateTimeField(auto_now_add=True)
     date_fin_tache = models.DateTimeField(auto_now_add=True)
+    quota = models.IntegerField(default=0)
 
     def __str__(self):
         return f"Tache - {self.intitule} : {self.statut}"
