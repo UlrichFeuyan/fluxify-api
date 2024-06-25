@@ -19,7 +19,9 @@ from .serializers import *
 from .models import *
 from datetime import datetime
 import os
-import pwd
+import os
+if os.name != 'nt':
+    import pwd
 import hashlib
 
 from django.http import JsonResponse
