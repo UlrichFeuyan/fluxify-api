@@ -9,7 +9,10 @@ from users.models import User
 #
 class Statut(models.Model):
     intitule = models.CharField(max_length=255, blank=True, null=True)
-    coouleur = models.CharField(max_length=255, blank=True, null=True)
+    couleur = models.CharField(max_length=255, blank=True, null=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return f"{self.intitule}"
@@ -29,10 +32,12 @@ class Tache(models.Model):
     initiateur = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='initiated_taches')
     executeur = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='executed_taches')
     statut = models.ForeignKey(Statut, on_delete=models.CASCADE, related_name='statut')
-    date_debut_tache = models.DateTimeField(auto_now_add=True)
-    date_fin_tache = models.DateTimeField(auto_now_add=True)
-    quota = models.IntegerField(default=0)
+    date_debut_tache = models.DateTimeField(blank=True, null=True)
+    date_fin_tache = models.DateTimeField(blank=True, null=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return f"Tache - {self.intitule} : {self.statut}"
-    
+

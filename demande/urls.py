@@ -1,13 +1,12 @@
 from django.urls import path, include
+from .views import DemandeViewSet, DemandeValidationViewSet, CommentaireViewSet, TypeDemandeViewset
 from rest_framework import routers
-from .views import *
 
 router = routers.SimpleRouter()
-# router.register('activitesmission', ActivitesMissionViewset, basename='activitesmission')
-router.register('demande', DemandeViewset, basename='demande')
-router.register('typedemande', TypeDemandeViewset, basename='typedemande')
-router.register('commentaire', CommentaireViewset, basename='commentaires')
-
+router.register(r'demandes', DemandeViewSet, basename='demande')
+router.register(r'validations', DemandeValidationViewSet, basename='demandevalidation')
+router.register(r'commentaires', CommentaireViewSet, basename='commentaire')
+router.register(r'types', TypeDemandeViewset, basename='typedemande')
 
 app_name = 'demande'
 urlpatterns = [
