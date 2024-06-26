@@ -67,18 +67,42 @@ class TacheRetrieveUpdateDestroy(generics.RetrieveUpdateDestroyAPIView):
 class TachesByInitiateurListView(generics.ListAPIView):
     serializer_class = TacheSerializer
 
-    def get_queryset(self):
-        initiateur_id = self.kwargs['initiateur_id']
-        initiateur = get_object_or_404(User, id=initiateur_id)
-        return Tache.objects.filter(initiateur=initiateur)
+    def get(self, request, *args, **kwargs):
+        try:
+            initiateur_id = self.kwargs['initiateur_id']
+            if not isinstance(initiateur_id, str):
+                return Response({"error": "Mauvais type de donnée entrée"}, status=status.HTTP_404_NOT_FOUND)
+
+            initiateur = get_object_or_404(User, codeuser=initiateur_id)
+            queryset = Tache.objects.filter(initiateur=initiateur)
+            if not queryset.exists():
+                return Response({"error": "Aucune tâche trouvée"}, status=status.HTTP_404_NOT_FOUND)
+            serializer = self.get_serializer(queryset, many=True)
+            return Response(serializer.data)
+        except User.DoesNotExist:
+            return Response({"error": "Initiateur not found"}, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 class TachesByExecuteurListView(generics.ListAPIView):
     serializer_class = TacheSerializer
 
-    def get_queryset(self):
-        executeur_id = self.kwargs['executeur_id']
-        executeur = get_object_or_404(User, id=executeur_id)
-        return Tache.objects.filter(executeur=executeur)
+    def get(self, request, *args, **kwargs):
+        try:
+            executeur_id = self.kwargs['executeur_id']
+            if not isinstance(executeur_id, str):
+                return Response({"error": "Mauvais type de donnée entrée"}, status=status.HTTP_404_NOT_FOUND)
+
+            executeur = get_object_or_404(User, codeuser=executeur_id)
+            queryset = Tache.objects.filter(executeur=executeur)
+            if not queryset.exists():
+                return Response({"error": "Aucune tâche trouvée"}, status=status.HTTP_404_NOT_FOUND)
+            serializer = self.get_serializer(queryset, many=True)
+            return Response(serializer.data)
+        except User.DoesNotExist:
+            return Response({"error": "Executeur not found"}, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     
 class TachesByInitiateurAndDateListView(generics.ListAPIView):
     serializer_class = TacheSerializer
