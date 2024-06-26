@@ -85,44 +85,40 @@ class TachesByInitiateurAndDateListView(generics.ListAPIView):
 
     def get_queryset(self):
         initiateur_id = self.kwargs['initiateur_id']
-        date_str = self.kwargs['date']
         initiateur = get_object_or_404(User, id=initiateur_id)
-        date = datetime.strptime(date_str, '%Y-%m-%d')
-        return Tache.objects.filter(initiateur=initiateur, date_debut_tache__date=date)
+        today = datetime.today().date()
+        return Tache.objects.filter(initiateur=initiateur)
 
 class TachesByExecuteurAndDateListView(generics.ListAPIView):
     serializer_class = TacheSerializer
 
     def get_queryset(self):
         executeur_id = self.kwargs['executeur_id']
-        date_str = self.kwargs['date']
         executeur = get_object_or_404(User, id=executeur_id)
-        date = datetime.strptime(date_str, '%Y-%m-%d')
-        return Tache.objects.filter(executeur=executeur, date_debut_tache__date=date)
-    
+        today = datetime.today().date()
+        return Tache.objects.filter(executeur=executeur)    
 
 class CumulativeQuotaByInitiateurView(APIView):
-    def get(self, request, initiateur_id, date):
-        date_obj = datetime.strptime(date, '%Y-%m-%d')
+    def get(self, request, initiateur_id):
+        today = datetime.today().date()
         initiateur = get_object_or_404(User, id=initiateur_id)
         
         # Filter tasks by date and by initiateur
-        taches_initiateur = Tache.objects.filter(initiateur=initiateur, date_debut_tache__date=date_obj)
+        taches_initiateur = Tache.objects.filter(initiateur=initiateur, date_debut_tache__date=today)
         
         # Sum the quotas
         quota_initiateur = taches_initiateur.aggregate(Sum('quota'))['quota__sum'] or 0
-        
-        return Response({'date': date, 'initiateur_id': initiateur_id, 'cumulative_quota': quota_initiateur})
+        return Response({'initiateur_id': initiateur_id, 'cumulative_quota': quota_initiateur})
 
 class CumulativeQuotaByExecuteurView(APIView):
-    def get(self, request, executeur_id, date):
-        date_obj = datetime.strptime(date, '%Y-%m-%d')
+    def get(self, request, executeur_id):
+        today = datetime.today().date()
         executeur = get_object_or_404(User, id=executeur_id)
         
         # Filter tasks by date and by executeur
-        taches_executeur = Tache.objects.filter(executeur=executeur, date_debut_tache__date=date_obj)
+        taches_executeur = Tache.objects.filter(executeur=executeur, date_debut_tache__date=today)
         
         # Sum the quotas
         quota_executeur = taches_executeur.aggregate(Sum('quota'))['quota__sum'] or 0
-        
-        return Response({'date': date, 'executeur_id': executeur_id, 'cumulative_quota': quota_executeur})
+        return Response({'executeur_id': executeur_id, 'cumulative_quota': quota_executeur})
+
