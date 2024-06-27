@@ -34,6 +34,7 @@ class Tache(models.Model):
     statut = models.ForeignKey(Statut, on_delete=models.CASCADE, related_name='statut')
     date_debut_tache = models.DateTimeField(blank=True, null=True)
     date_fin_tache = models.DateTimeField(blank=True, null=True)
+    quota = models.IntegerField(blank=True, null=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
