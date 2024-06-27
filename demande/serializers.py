@@ -1,15 +1,15 @@
 from rest_framework import serializers
-
-from users.models import Profil
 from .models import Demande, DemandeValidation, Commentaire, TypeDemande
-from users.serializers import UserSerializer, ProfilSerializer
+from users.serializers import UserSerializer
+
 
 class DemandeValidationSerializer(serializers.ModelSerializer):
     user = UserSerializer()
 
     class Meta:
         model = DemandeValidation
-        fields = '__all__'
+        fields = ['id', 'user', 'status', 'created_at', 'updated_at', 'demande']
+
 
 class TypeDemandeSerializer(serializers.ModelSerializer):
     validateurs_requis = UserSerializer(many=True, required=False)
@@ -28,6 +28,7 @@ class DemandeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Demande
         fields = ['id', 'type_demande', 'initiateur', 'status', 'active', 'created_at', 'updated_at', 'validations']
+
 
 class CommentaireSerializer(serializers.ModelSerializer):
     user = UserSerializer()
