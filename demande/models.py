@@ -1,11 +1,12 @@
 from django.db import models
 from users.models import User
 
+
 class TypeDemande(models.Model):
     nom = models.CharField(max_length=254)
     description = models.TextField(null=True)
-    profils_requis = models.ManyToManyField('users.Profil', related_name='types_demandes_requis', blank=True)
-    profils_optionnels = models.ManyToManyField('users.Profil', related_name='types_demandes_optionnels', blank=True)
+    validateurs_requis = models.ManyToManyField(User, related_name='types_demandes_requis', blank=True)
+    validateurs_optionnels = models.ManyToManyField(User, related_name='types_demandes_optionnels', blank=True)
     nombre_validations_min_requis = models.IntegerField(default=1, blank=True, null=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
@@ -18,7 +19,6 @@ class TypeDemande(models.Model):
 class Demande(models.Model):
     type_demande = models.ForeignKey(TypeDemande, on_delete=models.PROTECT, related_name='demandes')
     initiateur = models.ForeignKey('users.User', on_delete=models.SET_NULL, null=True, related_name='initiated_demandes')
-    validateurs = models.ManyToManyField('users.User', through='DemandeValidation', related_name='demandes_a_valider')
     status = models.IntegerField(default=0)  # status=0: en attente, 1: validé, 2: rejeté
     active = models.BooleanField(default=True)
 
@@ -31,31 +31,25 @@ class Demande(models.Model):
     def evaluer_statut(self):
         # Évaluer le statut global de la demande
         validations = self.validations.all()
-        validations_requises = [v for v in validations if v.user.profil in self.type_demande.profils_requis.all()]
-        validations_optionnelles = [v for v in validations if v.user.profil in self.type_demande.profils_optionnels.all()]
+        validations_requises = [v for v in validations if v.user in self.type_demande.validateurs_requis.all()]
+        validations_optionnelles = [v for v in validations if v.user in self.type_demande.validateurs_optionnels.all()]
 
-        nombre_validations_requises = self.type_demande.nombre_validations_min_requis
-
-        if nombre_validations_requises is None:
-            # Si le nombre de validations minimales requises n'est pas défini,
-            # tous les statuts de validation doivent être à 1 pour que la demande soit validée
-            if all(v.status == 1 for v in validations):
-                self.status = 1  # validé
-            elif any(v.status == 2 for v in validations):
-                self.status = 2  # rejeté
-            else:
-                self.status = 0  # en attente
+        if all(v.status for v in validations_requises) and len(validations_requises) >= self.type_demande.nombre_validations_min_requis:
+            self.status = 1  # validé
+        elif any(v.status is False for v in validations_requises):
+            self.status = 2  # rejeté
         else:
-            # Si le nombre de validations minimales requises est défini,
-            # vérifier les validations requises et optionnelles
-            if all(v.status == 1 for v in validations_requises) and len(validations_requises) >= nombre_validations_requises:
-                self.status = 1  # validé
-            elif any(v.status == 2 for v in validations_requises):
-                self.status = 2  # rejeté
-            else:
-                self.status = 0  # en attente
+            self.status = 0  # attente
 
         self.save()
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        if not self.pk:
+            for user in self.type_demande.validateurs_requis.all():
+                DemandeValidation.objects.create(demande=self, user=user)
+            for user in self.type_demande.validateurs_optionnels.all():
+                DemandeValidation.objects.create(demande=self, user=user)
 
 
 class DemandeValidation(models.Model):
