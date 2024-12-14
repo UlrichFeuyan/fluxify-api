@@ -7,6 +7,7 @@ from drf_yasg import openapi
 from .models import Demande, DemandeValidation, Commentaire, TypeDemande
 from .serializers import DemandeSerializer, DemandeValidationSerializer, CommentaireSerializer, TypeDemandeSerializer
 
+
 class DemandeViewSet(ModelViewSet):
     queryset = Demande.objects.all()
     serializer_class = DemandeSerializer
@@ -38,7 +39,7 @@ class DemandeViewSet(ModelViewSet):
     )
     @action(detail=False, methods=['get'], url_path='a-valider-par/(?P<codeuser>[^/.]+)', url_name='a-valider-par')
     def a_valider_par(self, request, codeuser=None):
-        demandes = Demande.objects.filter(validateurs__codeuser=codeuser, active=True, status=0)
+        demandes = Demande.objects.filter(validations__user__codeuser=codeuser, active=True, status=0)
         page = self.paginate_queryset(demandes)
         if page is not None:
             serializer = self.get_serializer(page, many=True)
@@ -70,7 +71,7 @@ class DemandeViewSet(ModelViewSet):
                 }
             )
         },
-        request_body=None  # Indique qu'il n'y a pas de corps de requête
+        request_body=None
     )
     @action(detail=True, methods=['post'], url_path='desactiver', url_name='desactiver')
     def desactiver(self, request, pk=None):
@@ -105,7 +106,7 @@ class DemandeViewSet(ModelViewSet):
                 }
             )
         },
-        request_body=None  # Indique qu'il n'y a pas de corps de requête
+        request_body=None
     )
     @action(detail=True, methods=['post'], url_path='activer', url_name='activer')
     def activer(self, request, pk=None):
@@ -117,21 +118,25 @@ class DemandeViewSet(ModelViewSet):
         except Demande.DoesNotExist:
             return Response({'error': 'Demande non trouvée'}, status=status.HTTP_404_NOT_FOUND)
 
+
+class DemandeValidationViewSet(ModelViewSet):
+    queryset = DemandeValidation.objects.all()
+    serializer_class = DemandeValidationSerializer
+
     @swagger_auto_schema(
         operation_description="Valider une demande",
         manual_parameters=[
-            openapi.Parameter('id', openapi.IN_PATH, description="ID de la demande à valider", type=openapi.TYPE_INTEGER)
+            openapi.Parameter('id', openapi.IN_PATH, description="ID de la validation à mettre à jour", type=openapi.TYPE_INTEGER)
         ],
         request_body=openapi.Schema(
             type=openapi.TYPE_OBJECT,
             properties={
-                'user_id': openapi.Schema(type=openapi.TYPE_INTEGER, description="ID de l'utilisateur validant"),
                 'status': openapi.Schema(type=openapi.TYPE_BOOLEAN, description="Statut de validation (True pour valider, False pour rejeter)")
             }
         ),
         responses={
             200: openapi.Response(
-                description="Validation de la demande mise à jour",
+                description="Validation mise à jour",
                 examples={
                     "application/json": {
                         "status": "validation mise à jour"
@@ -139,10 +144,10 @@ class DemandeViewSet(ModelViewSet):
                 }
             ),
             404: openapi.Response(
-                description="Demande non trouvée",
+                description="Validation non trouvée",
                 examples={
                     "application/json": {
-                        "error": "Demande non trouvée"
+                        "error": "Validation non trouvée"
                     }
                 }
             )
@@ -151,34 +156,29 @@ class DemandeViewSet(ModelViewSet):
     @action(detail=True, methods=['post'], url_path='valider', url_name='valider')
     def valider(self, request, pk=None):
         try:
-            demande = self.get_object()
-            user_id = request.data.get('user_id')
+            validation = self.get_object()
             status = request.data.get('status')
-            validation = DemandeValidation.objects.get(demande=demande, user_id=user_id)
-            validation.status = status
+            validation.status = 1 if status else 2  # 1 for validé, 2 for rejeté
             validation.save()
-            demande.evaluer_statut()
+            validation.demande.evaluer_statut()
             return Response({'status': 'validation mise à jour'}, status=status.HTTP_200_OK)
-        except Demande.DoesNotExist:
-            return Response({'error': 'Demande non trouvée'}, status=status.HTTP_404_NOT_FOUND)
         except DemandeValidation.DoesNotExist:
             return Response({'error': 'Validation non trouvée'}, status=status.HTTP_404_NOT_FOUND)
 
     @swagger_auto_schema(
         operation_description="Rejeter une demande",
         manual_parameters=[
-            openapi.Parameter('id', openapi.IN_PATH, description="ID de la demande à rejeter", type=openapi.TYPE_INTEGER)
+            openapi.Parameter('id', openapi.IN_PATH, description="ID de la validation à mettre à jour", type=openapi.TYPE_INTEGER)
         ],
         request_body=openapi.Schema(
             type=openapi.TYPE_OBJECT,
             properties={
-                'user_id': openapi.Schema(type=openapi.TYPE_INTEGER, description="ID de l'utilisateur rejetant"),
                 'status': openapi.Schema(type=openapi.TYPE_BOOLEAN, description="Statut de rejet (False pour rejeter)")
             }
         ),
         responses={
             200: openapi.Response(
-                description="Rejet de la demande mis à jour",
+                description="Rejet mis à jour",
                 examples={
                     "application/json": {
                         "status": "rejet mis à jour"
@@ -186,10 +186,10 @@ class DemandeViewSet(ModelViewSet):
                 }
             ),
             404: openapi.Response(
-                description="Demande non trouvée",
+                description="Validation non trouvée",
                 examples={
                     "application/json": {
-                        "error": "Demande non trouvée"
+                        "error": "Validation non trouvée"
                     }
                 }
             )
@@ -198,22 +198,13 @@ class DemandeViewSet(ModelViewSet):
     @action(detail=True, methods=['post'], url_path='rejeter', url_name='rejeter')
     def rejeter(self, request, pk=None):
         try:
-            demande = self.get_object()
-            user_id = request.data.get('user_id')
-            validation = DemandeValidation.objects.get(demande=demande, user_id=user_id)
-            validation.status = False  # Rejeter la demande
+            validation = self.get_object()
+            validation.status = 2  # Rejeter la demande
             validation.save()
-            demande.evaluer_statut()
+            validation.demande.evaluer_statut()
             return Response({'status': 'rejet mis à jour'}, status=status.HTTP_200_OK)
-        except Demande.DoesNotExist:
-            return Response({'error': 'Demande non trouvée'}, status=status.HTTP_404_NOT_FOUND)
         except DemandeValidation.DoesNotExist:
             return Response({'error': 'Validation non trouvée'}, status=status.HTTP_404_NOT_FOUND)
-
-
-class DemandeValidationViewSet(ModelViewSet):
-    queryset = DemandeValidation.objects.all()
-    serializer_class = DemandeValidationSerializer
 
 
 class CommentaireViewSet(ModelViewSet):
